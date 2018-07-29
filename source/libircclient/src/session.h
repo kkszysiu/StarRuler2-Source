@@ -16,10 +16,12 @@
 #ifndef INCLUDE_IRC_SESSION_H
 #define INCLUDE_IRC_SESSION_H
 
-
+#include "libircclient.h"
+#include "portable.h"
+#include "sockets.h"
 #include "params.h"
 #include "dcc.h"
-#include "libirc_events.h"
+//#include "libirc_events.h"
 
 
 // Session flags
@@ -55,6 +57,7 @@ struct irc_session_s
 	char 		  *	realname;
 	char		  * username;
 	char		  *	nick;
+	char		  * ctcp_version;
 
 #if defined( ENABLE_IPV6 )
 	struct in6_addr	local_addr6;

@@ -11,7 +11,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public 
  * License for more details.
  */
-
+#include "ssl.h"
 
 #if defined (ENABLE_SSL)
 
@@ -24,7 +24,7 @@ static SSL_CTX * ssl_context = 0;
 static CRITICAL_SECTION * mutex_buf = 0;
 
 // OpenSSL callback to utilize static locks
-static void cb_openssl_locking_function( int mode, int n, const char * file, int line )
+void cb_openssl_locking_function( int mode, int n, const char * file, int line )
 {
     if ( mode & CRYPTO_LOCK)
         EnterCriticalSection( &mutex_buf[n] );
@@ -33,14 +33,14 @@ static void cb_openssl_locking_function( int mode, int n, const char * file, int
 }
 
 // OpenSSL callback to get the thread ID
-static unsigned long cb_openssl_id_function()
+unsigned long cb_openssl_id_function(void)
 {
     return ((unsigned long) GetCurrentThreadId() );
 }
 
-static int alloc_mutexes( unsigned int total )
+int alloc_mutexes( unsigned int total )
 {
-	int i;
+	unsigned int i;
 	
 	// Enable thread safety in OpenSSL
 	mutex_buf = (CRITICAL_SECTION*) malloc( total * sizeof(CRITICAL_SECTION) );
@@ -61,8 +61,11 @@ static int alloc_mutexes( unsigned int total )
 static pthread_mutex_t * mutex_buf = 0;
 
 // OpenSSL callback to utilize static locks
-static void cb_openssl_locking_function( int mode, int n, const char * file, int line )
+void cb_openssl_locking_function( int mode, int n, const char * file, int line )
 {
+    (void)file;
+    (void)line;
+
     if ( mode & CRYPTO_LOCK)
         pthread_mutex_lock( &mutex_buf[n] );
     else
@@ -70,14 +73,14 @@ static void cb_openssl_locking_function( int mode, int n, const char * file, int
 }
 
 // OpenSSL callback to get the thread ID
-static unsigned long cb_openssl_id_function()
+unsigned long cb_openssl_id_function()
 {
     return ((unsigned long) pthread_self() );
 }
 
-static int alloc_mutexes( unsigned int total )
+int alloc_mutexes( unsigned int total )
 {
-	int i;
+	unsigned i;
 	
 	// Enable thread safety in OpenSSL
 	mutex_buf = (pthread_mutex_t*) malloc( total * sizeof(pthread_mutex_t) );
@@ -93,7 +96,7 @@ static int alloc_mutexes( unsigned int total )
 
 #endif
 
-static int ssl_init_context( irc_session_t * session )
+int ssl_init_context( irc_session_t * session )
 {
 	// Load the strings and init the library
 	SSL_load_error_strings();
@@ -152,7 +155,7 @@ static int ssl_init_context( irc_session_t * session )
 #endif
 
 // Initializes the SSL context. Must be called after the socket is created.
-static int ssl_init( irc_session_t * session )
+int ssl_init( irc_session_t * session )
 {
 	static int ssl_context_initialized = 0;
 	
@@ -235,7 +238,7 @@ static void ssl_handle_error( irc_session_t * session, int ssl_error )
 #endif
 }
 
-static int ssl_recv( irc_session_t * session )
+int ssl_recv( irc_session_t * session )
 {
 	int count;
 	unsigned int amount = (sizeof (session->incoming_buf) - 1) - session->incoming_offset;
@@ -279,7 +282,7 @@ static int ssl_recv( irc_session_t * session )
 }
 
 
-static int ssl_send( irc_session_t * session )
+int ssl_send( irc_session_t * session )
 {
 	int count;
     ERR_clear_error();
@@ -324,7 +327,7 @@ static int ssl_send( irc_session_t * session )
 // Returns -1 in case there is an error and socket should be closed/connection terminated
 // Returns 0 in case there is a temporary error and the call should be retried (SSL_WANTS_WRITE case)
 // Returns a positive number if we actually read something
-static int session_socket_read( irc_session_t * session )
+int session_socket_read( irc_session_t * session )
 {
 	int length;
 
@@ -358,7 +361,7 @@ static int session_socket_read( irc_session_t * session )
 // Returns -1 in case there is an error and socket should be closed/connection terminated
 // Returns 0 in case there is a temporary error and the call should be retried (SSL_WANTS_WRITE case)
 // Returns a positive number if we actually sent something
-static int session_socket_write( irc_session_t * session )
+int session_socket_write( irc_session_t * session )
 {
 	int length;
 

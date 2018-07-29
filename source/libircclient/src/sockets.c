@@ -15,37 +15,9 @@
 /*
  * The sockets interface was moved out to simplify going OpenSSL integration.
  */
-#if !defined (_WIN32)
-	#include <sys/socket.h>
-	#include <netdb.h>
-	#include <arpa/inet.h>	
-	#include <netinet/in.h>
-	#include <fcntl.h>
+#include "sockets.h"
 
-	#define IS_SOCKET_ERROR(a)	((a)<0)
-	typedef int				socket_t;
-
-#else
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-	#include <windows.h>
-
-	#define IS_SOCKET_ERROR(a)	((a)==SOCKET_ERROR)
-
-	#define EWOULDBLOCK		WSAEWOULDBLOCK
-	#define EINPROGRESS		WSAEINPROGRESS
-	#define EINTR			WSAEINTR
-
-	typedef SOCKET			socket_t;
-
-#endif
-
-#ifndef INADDR_NONE
-	#define INADDR_NONE 	0xFFFFFFFF
-#endif
-
-
-static int socket_error()
+int socket_error()
 {
 #if !defined (_WIN32)
 	return errno;
@@ -55,25 +27,25 @@ static int socket_error()
 }
 
 
-static int socket_create (int domain, int type, socket_t * sock)
+int socket_create (int domain, int type, socket_t * sock)
 {
 	*sock = socket (domain, type, 0);
 	return IS_SOCKET_ERROR(*sock) ? 1 : 0;
 }
 
 
-static int socket_make_nonblocking (socket_t * sock)
+int socket_make_nonblocking (socket_t * sock)
 {
 #if !defined (_WIN32)
 	return fcntl (*sock, F_SETFL, fcntl (*sock, F_GETFL,0 ) | O_NONBLOCK) != 0;
 #else
-	unsigned long mode = 0;
+	unsigned long mode = 1;
 	return ioctlsocket (*sock, FIONBIO, &mode) == SOCKET_ERROR;
 #endif
 }
 
 
-static int socket_close (socket_t * sock)
+int socket_close (socket_t * sock)
 {
 #if !defined (_WIN32)
 	close (*sock);
@@ -86,7 +58,7 @@ static int socket_close (socket_t * sock)
 }
 
 
-static int socket_connect (socket_t * sock, const struct sockaddr *saddr, socklen_t len)
+int socket_connect (socket_t * sock, const struct sockaddr *saddr, socklen_t len)
 {
 	while ( 1 )
 	{
@@ -104,7 +76,7 @@ static int socket_connect (socket_t * sock, const struct sockaddr *saddr, sockle
 }
 
 
-static int socket_accept (socket_t * sock, socket_t * newsock, struct sockaddr *saddr, socklen_t * len)
+int socket_accept (socket_t * sock, socket_t * newsock, struct sockaddr *saddr, socklen_t * len)
 {
 	while ( IS_SOCKET_ERROR(*newsock = accept (*sock, saddr, len)) )
 	{
@@ -118,7 +90,7 @@ static int socket_accept (socket_t * sock, socket_t * newsock, struct sockaddr *
 }
 
 
-static int socket_recv (socket_t * sock, void * buf, size_t len)
+int socket_recv (socket_t * sock, void * buf, size_t len)
 {
 	int length;
 
@@ -134,7 +106,7 @@ static int socket_recv (socket_t * sock, void * buf, size_t len)
 }
 
 
-static int socket_send (socket_t * sock, const void *buf, size_t len)
+int socket_send (socket_t * sock, const void *buf, size_t len)
 {
 	int length;
 

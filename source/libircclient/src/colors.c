@@ -12,7 +12,7 @@
  * License for more details.
  */
 
-#include <ctype.h>
+#include "colors.h"
 
 #define LIBIRC_COLORPARSER_BOLD			(1<<1)
 #define LIBIRC_COLORPARSER_UNDERLINE	(1<<2)
@@ -44,7 +44,7 @@ static const char * color_replacement_table[] =
 };
 
 
-static inline void libirc_colorparser_addorcat (char ** destline, unsigned int * destlen, const char * str)
+void libirc_colorparser_addorcat (char ** destline, unsigned int * destlen, const char * str)
 {
 	unsigned int len = strlen(str);
 
@@ -58,7 +58,7 @@ static inline void libirc_colorparser_addorcat (char ** destline, unsigned int *
 }
 
 
-static void libirc_colorparser_applymask (unsigned int * mask, 
+void libirc_colorparser_applymask (unsigned int * mask, 
 		char ** destline, unsigned int * destlen,
 		unsigned int bitmask, const char * start, const char * end)
 {
@@ -75,7 +75,7 @@ static void libirc_colorparser_applymask (unsigned int * mask,
 }
 
 
-static void libirc_colorparser_applycolor (unsigned int * mask, 
+void libirc_colorparser_applycolor (unsigned int * mask, 
 		char ** destline, unsigned int * destlen,
 		unsigned int colorid, unsigned int bgcolorid)
 {
@@ -95,7 +95,7 @@ static void libirc_colorparser_applycolor (unsigned int * mask,
 }
 
 
-static void libirc_colorparser_closetags (unsigned int * mask, 
+void libirc_colorparser_closetags (unsigned int * mask, 
 		char ** destline, unsigned int * destlen)
 {
 	if ( *mask & LIBIRC_COLORPARSER_BOLD )
@@ -116,7 +116,7 @@ static void libirc_colorparser_closetags (unsigned int * mask,
 /*
  * IRC to [code] color conversion. Or strip.
  */
-static char * libirc_colorparser_irc2code (const char * source, int strip)
+char * libirc_colorparser_irc2code (const char * source, int strip)
 {
 	unsigned int mask = 0, destlen = 0;
 	char * destline = 0, *d = 0;
@@ -133,7 +133,7 @@ static char * libirc_colorparser_irc2code (const char * source, int strip)
 		if ( destlen > 0 )
 		{
 			// This is the 2nd pass; allocate memory.
-			if ( (destline = (char*)malloc (destlen)) == 0 )
+			if ( (destline = malloc (destlen)) == 0 )
 				return 0;
 
 			d = destline;
@@ -232,7 +232,7 @@ static char * libirc_colorparser_irc2code (const char * source, int strip)
 }
 
 
-static int libirc_colorparser_colorlookup (const char * color)
+int libirc_colorparser_colorlookup (const char * color)
 {
 	int i;
 	for ( i = 0; color_replacement_table[i]; i++ )
@@ -262,7 +262,7 @@ char * irc_color_convert_to_mirc (const char * source)
 		if ( destlen > 0 )
 		{
 			// This is the 2nd pass; allocate memory.
-			if ( (destline = (char*)malloc (destlen)) == 0 )
+			if ( (destline = malloc (destlen)) == 0 )
 				return 0;
 
 			d = destline;

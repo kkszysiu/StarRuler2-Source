@@ -12,12 +12,15 @@
  * License for more details.
  */
 
+#include "dcc.h"
+#include "session.h"
+
 #define LIBIRC_DCC_CHAT			1
 #define LIBIRC_DCC_SENDFILE		2
 #define LIBIRC_DCC_RECVFILE		3
 
 
-static irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list)
+irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list)
 {
 	irc_dcc_session_t * s, *found = 0;
 
@@ -40,7 +43,7 @@ static irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc
 }
 
 
-static void libirc_dcc_destroy_nolock (irc_session_t * session, irc_dcc_t dccid)
+void libirc_dcc_destroy_nolock (irc_session_t * session, irc_dcc_t dccid)
 {
 	irc_dcc_session_t * dcc = libirc_find_dcc_session (session, dccid, 0);
 
@@ -54,7 +57,7 @@ static void libirc_dcc_destroy_nolock (irc_session_t * session, irc_dcc_t dccid)
 }
 
 
-static void libirc_remove_dcc_session (irc_session_t * session, irc_dcc_session_t * dcc, int lock_list)
+void libirc_remove_dcc_session (irc_session_t * session, irc_dcc_session_t * dcc, int lock_list)
 {
 	if ( dcc->sock >= 0 )
 		socket_close (&dcc->sock);
@@ -91,7 +94,7 @@ static void libirc_remove_dcc_session (irc_session_t * session, irc_dcc_session_
 }
 
 
-static void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_set, fd_set *out_set, int * maxfd)
+void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_set, fd_set *out_set, int * maxfd)
 {
 	irc_dcc_session_t * dcc, *dcc_next;
 	time_t now = time (0);
@@ -208,7 +211,7 @@ static void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_s
 }
 
 
-static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *in_set, fd_set *out_set)
+void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *in_set, fd_set *out_set)
 {
 	irc_dcc_session_t * dcc;
 
@@ -224,7 +227,12 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 		&& FD_ISSET (dcc->sock, in_set) )
 		{
 			socklen_t len = sizeof(dcc->remote_addr);
+
+#if defined(_WIN32)
+			SOCKET nsock, err = 0;
+#else
 			int nsock, err = 0;
+#endif
 
 			// New connection is available; accept it.
 			if ( socket_accept (&dcc->sock, &nsock, (struct sockaddr *) &dcc->remote_addr, &len) )
@@ -509,9 +517,9 @@ static void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *
 }
 
 
-static int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, unsigned short port, int dccmode, void * ctx, irc_dcc_session_t ** pdcc)
+int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, unsigned short port, int dccmode, void * ctx, irc_dcc_session_t ** pdcc)
 {
-	irc_dcc_session_t * dcc = (irc_dcc_session_t*)malloc (sizeof(irc_dcc_session_t));
+	irc_dcc_session_t * dcc = malloc (sizeof(irc_dcc_session_t));
 
 	if ( !dcc )
 		return LIBIRC_ERR_NOMEM;
@@ -705,7 +713,7 @@ int irc_dcc_msg	(irc_session_t * session, irc_dcc_t dccid, const char * text)
 }
 
 
-static void libirc_dcc_request (irc_session_t * session, const char * nick, const char * req)
+void libirc_dcc_request (irc_session_t * session, const char * nick, const char * req)
 {
 	char filenamebuf[256];
 	unsigned long ip, size;

@@ -11,26 +11,13 @@
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public 
  * License for more details.
  */
+#ifndef INCLUDE_IRC_ERROR_SESSION_H
+#define INCLUDE_IRC_ERROR_SESSION_H
 
-#ifndef INCLUDE_IRC_PARAMS_H
-#define INCLUDE_IRC_PARAMS_H
+//#include "libircclient.h"
+#include "session.h"
 
+int irc_errno (irc_session_t * session);
+const char * irc_strerror (int ircerrno);
 
-#define LIBIRC_VERSION_HIGH			1
-#define LIBIRC_VERSION_LOW			9
-
-#define LIBIRC_BUFFER_SIZE			1024
-#define LIBIRC_DCC_BUFFER_SIZE		1024
-
-#define LIBIRC_STATE_INIT			0
-#define LIBIRC_STATE_LISTENING		1
-#define LIBIRC_STATE_CONNECTING		2
-#define LIBIRC_STATE_CONNECTED		3
-#define LIBIRC_STATE_DISCONNECTED	4
-#define LIBIRC_STATE_CONFIRM_SIZE	5	// Used only by DCC send to confirm the amount of sent data
-#define LIBIRC_STATE_REMOVED		10	// this state is used only in DCC
-
-
-#define SSL_PREFIX					'#'
-
-#endif /* INCLUDE_IRC_PARAMS_H */
+#endif /* INCLUDE_IRC_ERROR_SESSION_H */

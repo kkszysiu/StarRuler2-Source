@@ -14,17 +14,17 @@
 
 #define IS_DEBUG_ENABLED(s)	((s)->options & LIBIRC_OPTION_DEBUG)
 
-#include "portable.c"
-#include "sockets.c"
+#include "portable.h"
+#include "sockets.h"
 
 #include "libircclient.h"
 #include "session.h"
 
-#include "utils.c"
-#include "errors.c"
-#include "colors.c"
-#include "dcc.c"
-#include "ssl.c"
+#include "utils.h"
+#include "errors.h"
+#include "colors.h"
+#include "dcc.h"
+#include "ssl.h"
 
 
 #ifdef _MSC_VER
@@ -37,10 +37,31 @@
 	#define strdup _strdup
 #endif
 
+#if defined (WIN32_DLL)
+static int winsock_refcount = 0;
+#endif
 
 irc_session_t * irc_create_session (irc_callbacks_t	* callbacks)
 {
-	irc_session_t * session = (irc_session_t*)malloc (sizeof(irc_session_t));
+    irc_session_t * session;
+    
+#if defined (WIN32_DLL)
+    // From MSDN: The WSAStartup function typically leads to protocol-specific helper 
+    // DLLs being loaded. As a result, the WSAStartup function should not be called 
+    // from the DllMain function in a application DLL. This can potentially cause deadlocks.
+    if ( winsock_refcount == 0 )
+    {
+        WORD wVersionRequested = MAKEWORD (1, 1);
+        WSADATA wsaData;
+
+        if ( WSAStartup (wVersionRequested, &wsaData) != 0 )
+            return 0;
+        
+        winsock_refcount++;
+    }
+#endif
+    
+	session = malloc (sizeof(irc_session_t));
 
 	if ( !session )
 		return 0;
@@ -93,6 +114,10 @@ static void free_ircsession_strings (irc_session_t * session)
 void irc_destroy_session (irc_session_t * session)
 {
 	free_ircsession_strings( session );
+
+	// The CTCP VERSION must be freed only now
+	if ( session->ctcp_version )
+		free (session->ctcp_version);
 	
 	if ( session->sock >= 0 )
 		socket_close (&session->sock);
@@ -101,6 +126,11 @@ void irc_destroy_session (irc_session_t * session)
 	libirc_mutex_destroy (&session->mutex_session);
 #endif
 
+#if defined (ENABLE_SSL)
+	if ( session->ssl )
+		SSL_free( session->ssl );
+#endif
+	
 	/* 
 	 * delete DCC data 
 	 * libirc_remove_dcc_session removes the DCC session from the list.
@@ -108,7 +138,14 @@ void irc_destroy_session (irc_session_t * session)
 	while ( session->dcc_sessions )
 		libirc_remove_dcc_session (session, session->dcc_sessions, 0);
 
+	libirc_mutex_destroy (&session->mutex_dcc);
+
 	free (session);
+    
+#if defined (WIN32_DLL)
+    if ( --winsock_refcount == 0 )
+        WSACleanup();
+#endif
 }
 
 
@@ -686,9 +723,9 @@ static void libirc_process_incoming_data (irc_session_t * session, size_t proces
 					memcpy (ctcp_buf, params[1] + 1, msglen);
 					ctcp_buf[msglen] = '\0';
 
-					if ( msglen >= 4 && !strncasecmp(ctcp_buf, "DCC ", 4) )
+					if ( !strncasecmp(ctcp_buf, "DCC ", 4) )
 						libirc_dcc_request (session, prefix, ctcp_buf);
-					else if ( msglen >= 7 && !strncasecmp( ctcp_buf, "ACTION ", 7)
+					else if ( !strncasecmp( ctcp_buf, "ACTION ", 7)
 					&& session->callbacks.event_ctcp_action )
 					{
 						params[1] = ctcp_buf + 7; // the length of "ACTION "
@@ -791,9 +828,12 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 	libirc_dcc_process_descriptors (session, in_set, out_set);
 
 	// Handle "connection succeed" / "connection failed"
-	if ( session->state == LIBIRC_STATE_CONNECTING 
-	&& FD_ISSET (session->sock, out_set) )
+	if ( session->state == LIBIRC_STATE_CONNECTING )
 	{
+        // If the socket is not connected yet, wait longer - it is not an error
+        if ( !FD_ISSET (session->sock, out_set) )
+            return 0;
+        
 		// Now we have to determine whether the socket is connected 
 		// or the connect is failed
 		struct sockaddr_storage saddr, laddr;
@@ -850,7 +890,10 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 	}
 
 	if ( session->state != LIBIRC_STATE_CONNECTED )
+	{
+		session->lasterror = LIBIRC_ERR_STATE;
 		return 1;
+	}
 
 	// Hey, we've got something to read!
 	if ( FD_ISSET (session->sock, in_set) )
@@ -1077,7 +1120,7 @@ int irc_cmd_notice (irc_session_t * session, const char * nch, const char * text
 
 void irc_target_get_nick (const char * target, char *nick, size_t size)
 {
-	const char *p = strstr (target, "!");
+	char *p = strstr (target, "!");
 	unsigned int len;
 
 	if ( p )
@@ -1151,6 +1194,15 @@ void irc_set_ctx (irc_session_t * session, void * ctx)
 void * irc_get_ctx (irc_session_t * session)
 {
 	return session->ctx;
+}
+
+
+void irc_set_ctcp_version (irc_session_t * session, const char * version)
+{
+	if ( session->ctcp_version )
+		free(session->ctcp_version);
+
+	session->ctcp_version = strdup(version);
 }
 
 

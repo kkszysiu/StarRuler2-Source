@@ -15,6 +15,13 @@
 #ifndef INCLUDE_IRC_DCC_H
 #define INCLUDE_IRC_DCC_H
 
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+
+#include "params.h"
+#include "session.h"
 
 /*
  * This structure keeps the state of a single DCC connection.
@@ -50,5 +57,18 @@ struct irc_dcc_session_s
 	irc_dcc_callback_t		cb;
 };
 
+irc_dcc_session_t * libirc_find_dcc_session (irc_session_t * session, irc_dcc_t dccid, int lock_list);
+void libirc_dcc_destroy_nolock (irc_session_t * session, irc_dcc_t dccid);
+void libirc_remove_dcc_session (irc_session_t * session, irc_dcc_session_t * dcc, int lock_list);
+void libirc_dcc_add_descriptors (irc_session_t * ircsession, fd_set *in_set, fd_set *out_set, int * maxfd);
+void libirc_dcc_process_descriptors (irc_session_t * ircsession, fd_set *in_set, fd_set *out_set);
+int libirc_new_dcc_session (irc_session_t * session, unsigned long ip, unsigned short port, int dccmode, void * ctx, irc_dcc_session_t ** pdcc);
+int irc_dcc_destroy (irc_session_t * session, irc_dcc_t dccid);
+int	irc_dcc_chat (irc_session_t * session, void * ctx, const char * nick, irc_dcc_callback_t callback, irc_dcc_t * dccid);
+int irc_dcc_msg	(irc_session_t * session, irc_dcc_t dccid, const char * text);
+void libirc_dcc_request (irc_session_t * session, const char * nick, const char * req);
+int	irc_dcc_accept (irc_session_t * session, irc_dcc_t dccid, void * ctx, irc_dcc_callback_t callback);
+int irc_dcc_decline (irc_session_t * session, irc_dcc_t dccid);
+int	irc_dcc_sendfile (irc_session_t * session, void * ctx, const char * nick, const char * filename, irc_dcc_callback_t callback, irc_dcc_t * dccid);
 
 #endif /* INCLUDE_IRC_DCC_H */

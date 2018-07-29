@@ -11,6 +11,9 @@
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public 
  * License for more details.
  */
+#include "errors.h"
+#include "session.h"
+
 
 static const char * libirc_strerror[LIBIRC_ERR_MAX] = 
 {
@@ -51,4 +54,3 @@ const char * irc_strerror (int ircerrno)
 	else
 		return "Invalid irc_errno value";
 }
-
