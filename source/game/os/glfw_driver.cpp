@@ -282,7 +282,8 @@ public:
 	}
 
 	void flashWindow() override {
-		glfwFlashWindow(window);
+                glfwFocusWindow(window);
+		//glfwFlashWindow(window);
 	}
 	
 	bool isMouseOver() {
@@ -301,11 +302,13 @@ public:
 	}
 
 	int getCharForKey(int key) {
-		return glfwGetCharForKey(key);
+		//return glfwGetCharForKey(key);
+                return glfwGetKey(window, key);
 	}
 
 	int getKeyForChar(unsigned char chr) {
-		return glfwGetKeyForChar(chr);
+		//return glfwGetKeyForChar(chr);
+                return (int)(chr);
 	}
 
 	unsigned getDoubleClickTime() const {
@@ -342,10 +345,13 @@ public:
 			return;
 		canLock = locked;
 		if(shouldLock) {
-			if(locked)
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
-			else
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_FREE);
+			if(locked) {
+                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+				//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+			} else {
+                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_FREE);
+                        }
 		}
 	}
 	
@@ -354,10 +360,13 @@ public:
 			return;
 		shouldLock = locked;
 		if(canLock) {
-			if(locked)
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
-			else
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_FREE);
+			if(locked) {
+                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+				//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+			} else {
+                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				///glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_FREE);
+                        }
 		}
 	}
 
