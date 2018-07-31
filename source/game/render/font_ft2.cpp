@@ -9,7 +9,9 @@
 #ifdef _MSC_VER
 #include <ft2build.h>
 #else
-#include <freetype2/ft2build.h>
+#include <ft2build.h>
+
+//#include <freetype2/ft2build.h>
 #endif
 
 #include FT_FREETYPE_H
