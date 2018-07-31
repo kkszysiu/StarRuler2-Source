@@ -2,7 +2,7 @@
 #include "ISoundDevice.h"
 
 #include "al.h"
-#include "ogg.h"
+#include "ogg/ogg.h"
 
 #include "threads.h"
 
@@ -18,7 +18,7 @@
 //Much of this loader is taken from "PlayOggVorbis.cpp" in the OpenAL SDK
 //==========
 
-#include <vorbisfile.h>
+#include <vorbis/vorbisfile.h>
 
 #ifndef LIN_MODE
 #include "windows.h"
@@ -40,7 +40,7 @@ typedef long (*LPOVREAD)(OggVorbis_File *vf,char *buffer,int length,int bigendia
 typedef ogg_int64_t (*LPOVPCMTOTAL)(OggVorbis_File *vf,int i);
 typedef vorbis_info * (*LPOVINFO)(OggVorbis_File *vf,int link);
 typedef vorbis_comment * (*LPOVCOMMENT)(OggVorbis_File *vf,int link);
-typedef int (*LPOVOPENCALLBACKS)(void *datasource, OggVorbis_File *vf,char *initial, long ibytes, ov_callbacks callbacks);
+typedef int (*LPOVOPENCALLBACKS)(void *datasource, OggVorbis_File *vf, const char *initial, long ibytes, ov_callbacks callbacks);
 typedef long (*LPOVSEEKABLE)(OggVorbis_File *vf);
 typedef int (*LPOVPCMSEEK)(OggVorbis_File *vf,ogg_int64_t pos);
 typedef ogg_int64_t (*LPOVPCMTELL)(OggVorbis_File *vf);
