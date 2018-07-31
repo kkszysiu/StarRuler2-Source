@@ -1,0 +1,18 @@
+file(GLOB sub-dir *)
+set(list_of_dirs "")
+foreach(dir ${sub-dir})
+    if(IS_DIRECTORY ${dir})
+        get_filename_component(FNAME ${dir} NAME)
+        set(list_of_dirs ${list_of_dirs} ${FNAME})
+    endif()
+endforeach()
+
+foreach(addon ${list_of_dirs})
+    file(GLOB_RECURSE AngelScript_${addon}_SOURCES ${addon}/*)
+
+    add_library(AngelScript_${addon} ${AngelScript_${addon}_SOURCES})
+    target_include_directories(AngelScript_${addon} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(AngelScript_${addon} PUBLIC ${addon})
+    set_property(TARGET AngelScript_${addon} PROPERTY CXX_STANDARD 14)
+    set_target_properties(AngelScript_${addon} PROPERTIES EXCLUDE_FROM_ALL TRUE EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+endforeach()
