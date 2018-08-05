@@ -1,3 +1,4 @@
+#ifdef USE_GLFW
 #include "os/glfw_driver.h"
 #include "compat/misc.h"
 #include "compat/gl.h"
@@ -84,7 +85,7 @@ public:
 		glfwTerminate();
 	}
 	
-	bool systemRandom(unsigned char* buffer, unsigned bytes) {
+	bool systemRandom(unsigned char* buffer, unsigned bytes) override {
 #ifdef WIN_MODE
 		HCRYPTPROV provider;
 		
@@ -108,11 +109,11 @@ public:
 #endif
 	}
 
-	void setVerticalSync(int waitFrames) {
+	void setVerticalSync(int waitFrames) override {
 		glfwSwapInterval(waitFrames);
 	}
 
-	void swapBuffers(double minWait_s) {
+	void swapBuffers(double minWait_s) override {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if(devices.cloud)
@@ -139,13 +140,13 @@ public:
 		frameTime = curTime;
 	}
 
-	void handleEvents(unsigned minWait_ms) {
+	void handleEvents(unsigned minWait_ms) override {
 		glfwPollEvents();
 		frameTime = getAccurateTime();
 		threads::sleep(minWait_ms);
 	}
 
-	void getDesktopSize(unsigned& width, unsigned& height) {
+	void getDesktopSize(unsigned& width, unsigned& height) override {
         auto* primary = glfwGetPrimaryMonitor();
         if(primary == nullptr) {
             width = 1280;
@@ -157,7 +158,7 @@ public:
 		height = desktop.height;
 	}
 
-	void createWindow(WindowData& data) {
+	void createWindow(WindowData& data) override {
 		glfwWindowHint(GLFW_SAMPLES, data.aa_samples);
 		glfwWindowHint(GLFW_REFRESH_RATE, data.refreshRate);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -238,7 +239,7 @@ public:
 #endif
 	}
 
-	void getVideoModes(std::vector<OSDriver::VideoMode>& output) {
+	void getVideoModes(std::vector<OSDriver::VideoMode>& output) override {
 		int count = 0;
 		const GLFWvidmode* modes;
         auto* primary = glfwGetPrimaryMonitor();
@@ -265,7 +266,7 @@ public:
 		}
 	}
 	
-	void getMonitorNames(std::vector<std::string>& output) {
+	void getMonitorNames(std::vector<std::string>& output) override {
 		int count = 0;
 		GLFWmonitor** monitors = glfwGetMonitors(&count);
 		output.resize(count);
@@ -282,36 +283,36 @@ public:
 	}
 
 	void flashWindow() override {
-                glfwFocusWindow(window);
+		glfwFocusWindow(window);
 		//glfwFlashWindow(window);
 	}
 	
-	bool isMouseOver() {
+	bool isMouseOver() override {
 		return mouseOver;
 	}
 
-	void setClipboard(const std::string& text) {
+	void setClipboard(const std::string& text) override {
 		glfwSetClipboardString(window, text.c_str());
 	}
 
-	std::string getClipboard() {
+	std::string getClipboard() override {
 		 const char* str = glfwGetClipboardString(window);
 		 if(str)
 			 return std::string(str);
 		 return std::string();
 	}
 
-	int getCharForKey(int key) {
+	int getCharForKey(int key) override {
 		//return glfwGetCharForKey(key);
-                return glfwGetKey(window, key);
+		return glfwGetKey(window, key);
 	}
 
-	int getKeyForChar(unsigned char chr) {
+	int getKeyForChar(unsigned char chr) override {
 		//return glfwGetKeyForChar(chr);
-                return (int)(chr);
+		return (int)(chr);
 	}
 
-	unsigned getDoubleClickTime() const {
+	unsigned getDoubleClickTime() const override {
 #ifdef _MSC_VER
 		return GetDoubleClickTime();
 #else
@@ -320,61 +321,61 @@ public:
 #endif
 	}
 	
-	void getLastMousePos(int& x, int& y) {
+	void getLastMousePos(int& x, int& y) override {
 		x = mouse_x;
 		y = mouse_y;
 	}
 
-	void getMousePos(int& x, int& y) {
+	void getMousePos(int& x, int& y) override {
 		double dx, dy;
 		glfwGetCursorPos(window, &dx,&dy);
 		x = (int)floor(dx);
 		y = (int)floor(dy);
 	}
 
-	void setMousePos(int x, int y) {
+	void setMousePos(int x, int y) override {
 		glfwSetCursorPos(window, x,y);
 	}
 
-	void setCursorVisible(bool visible) {
+	void setCursorVisible(bool visible) override {
 		glfwSetInputMode(window, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
 	}
 
-	void setCursorLocked(bool locked) {
+	void setCursorLocked(bool locked) override {
 		if(canLock == locked)
 			return;
 		canLock = locked;
 		if(shouldLock) {
 			if(locked) {
-                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 				//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
 			} else {
-                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 				//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_FREE);
-                        }
+			}
 		}
 	}
 	
-	void setCursorShouldLock(bool locked) {
+	void setCursorShouldLock(bool locked) override {
 		if(shouldLock == locked)
 			return;
 		shouldLock = locked;
 		if(canLock) {
 			if(locked) {
-                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 				//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
 			} else {
-                                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 				///glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_FREE);
-                        }
+			}
 		}
 	}
 
-	void sleep(int milliseconds) {
+	void sleep(int milliseconds) override {
 		threads::sleep(milliseconds);
 	}
 
-	void resetTimer() {
+	void resetTimer() override {
 #ifndef WIN_MODE
 		gettimeofday(&start_time, 0);
 #else
@@ -390,7 +391,7 @@ public:
 		resetGameTime(0);
 	}
 
-	int getTime() const {
+	int getTime() const override {
 #ifndef WIN_MODE
 		timeval cur_time;
 		gettimeofday(&cur_time, 0);
@@ -413,7 +414,7 @@ public:
 #endif
 	}
 
-	double getAccurateTime() const {
+	double getAccurateTime() const override {
 #ifndef WIN_MODE
 		timeval cur_time;
 		gettimeofday(&cur_time, 0);
@@ -429,41 +430,41 @@ public:
 #endif
 	}
 
-	void resetGameTime(double time) {
+	void resetGameTime(double time) override {
 		//Game time starts slightly ahead of render time
 		gameTime = time;
 		gameSpeed = 1;
 	}
 
-	double getGameTime() const {
+	double getGameTime() const override {
 		return gameTime;
 	}
 	
-	double getFrameTime() const {
+	double getFrameTime() const override {
 		return frameTime;
 	}
 
-	double getGameSpeed() const {
+	double getGameSpeed() const override {
 		return gameSpeed;
 	}
 
-	void setGameSpeed(double speed) {
+	void setGameSpeed(double speed) override {
 		gameSpeed = speed;
 	}
 
-	unsigned getProcessorCount() {
+	unsigned getProcessorCount() override {
 		return std::max(threads::getNumberOfProcessors(),1u);
 	}
 
-	void setWindowTitle(const char* str) {
+	void setWindowTitle(const char* str) override {
 		glfwSetWindowTitle(window, str);
 	}
 
-	void setWindowSize(int width, int height){
+	void setWindowSize(int width, int height) override {
 		glfwSetWindowSize(window, width, height);
 	}
 
-	void closeWindow() {
+	void closeWindow() override {
 		glfwDestroyWindow(window);
 	}
 };
@@ -576,3 +577,5 @@ OSDriver* getGLFWDriver() {
 }
 
 };
+
+#endif // USE_GLFW

@@ -2,7 +2,13 @@
 #include <Windows.h>
 #include <XInput.h>
 #endif
+
+#ifdef USE_GLFW
 #include "GLFW/glfw3.h"
+#elif USE_SDL2
+#include "SDL.h"
+#endif
+
 #include "binds.h"
 
 #define JOY_AXIS_MAX 16
@@ -81,8 +87,13 @@ struct XInputLibrary {
 namespace scripts {
 
 enum JoystickButtonState {
+#ifdef USE_GLFW
 	JBS_Off = GLFW_RELEASE,
 	JBS_On = GLFW_PRESS,
+#elif USE_SDL2
+	JBS_Off,
+	JBS_On,
+#endif
 	JBS_Released,
 	JBS_Pressed
 };
@@ -109,8 +120,11 @@ public:
 			return;
 		}
 #endif
+
+#ifdef USE_GLFW
 		if(Index >= 1 && Index <= 16)
 			index = GLFW_JOYSTICK_1 + (int)Index - 1;
+#endif
 		poll();
 	}
 
@@ -178,6 +192,7 @@ public:
 			return false;
 		}
 #ifdef LIN_MODE
+#ifdef USE_GLFW
 		else if(true) {
 			//Statically figured out button/axes numbers from the xboxdrv linux driver.
 			int btnCnt;
@@ -275,8 +290,12 @@ public:
 
 			return true;
 		}
-#endif
+#elif USE_SDL2
+		else if(true) {}
+#endif // 
+#endif // LIN_MODE
 		else {
+#ifdef USE_GLFW
 			int cnt;
 			auto* newState = glfwGetJoystickButtons(index, &cnt);
 			buttonCount = cnt;
@@ -316,6 +335,9 @@ public:
 					axes[i] = (val - GLFW_DEADZONE) / (1.f - GLFW_DEADZONE);
 			}
 			return buttonCount > 0;
+#else
+			return true;
+#endif
 		}
 	}
 
@@ -339,7 +361,9 @@ public:
 	}
 
 	bool connected() const {
+#ifdef USE_GLFW
 		return glfwJoystickPresent(index) == GL_TRUE;
+#endif
 	}
 
 	void setVibration(float lowFreq, float hiFreq) {

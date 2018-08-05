@@ -26,7 +26,6 @@ set(STARRULER2_SRC
 	game/obj/obj_group.cpp
 	game/obj/universe.cpp
 	game/obj/object_saving.cpp
-	game/os/glfw_driver.cpp
 	game/physics/physics_world.cpp
 	game/profile/keybinds.cpp
 	game/profile/settings.cpp
@@ -121,6 +120,26 @@ set(STARRULER2_SRC
 	game/main.cpp
 )
 
+if (USE_GLFW)
+	set(STARRULER2_GLFW_SRC
+		game/os/glfw_driver.cpp
+	)
+
+	include_directories(starruler2
+		${GLFW_INCLUDE_DIR}
+	)
+endif (USE_GLFW)
+
+if (USE_SDL2)
+	set(STARRULER2_SDL2_SRC
+		game/os/sdl2_driver.cpp
+	)
+
+	include_directories(starruler2
+		${SDL2_INCLUDE_DIR}
+	)
+endif (USE_SDL2)
+
 include_directories(starruler2
     os/include
     game
@@ -139,14 +158,10 @@ if(STARRULER2_BUILD_ANGELSCRIPT)
     include_directories(starruler2 angelscript/include)
 endif(STARRULER2_BUILD_ANGELSCRIPT)
 
-add_executable(starruler2 ${STARRULER2_SRC})
-# set(HINDSIGHT_LIBS
-# ${LUASANDBOX_LIBRARIES}
-# ${UNIX_LIBRARIES})
+add_executable(starruler2 ${STARRULER2_SRC} ${STARRULER2_GLFW_SRC} ${STARRULER2_SDL2_SRC})
 
 target_link_libraries(starruler2
     ${FREETYPE_LIBRARIES}
-    ${GLFW_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${CURL_LIBRARIES}
@@ -156,8 +171,17 @@ target_link_libraries(starruler2
     starruler2_sound
 )
 
-#target_compile_definitions(hindsight_cli PUBLIC "-DHINDSIGHT_CLI")
-#target_link_libraries(hindsight_cli ${HINDSIGHT_LIBS})
+if (USE_GLFW)
+	target_link_libraries(starruler2
+		${GLFW_LIBRARIES}
+	)
+endif (USE_GLFW)
+
+if (USE_SDL2)
+	target_link_libraries(starruler2
+		${SDL2_LIBRARY}
+	)
+endif (USE_SDL2)
 
 install(
     TARGETS starruler2

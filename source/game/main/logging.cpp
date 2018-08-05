@@ -13,6 +13,7 @@ std::ofstream logFile;
 std::fstream errorLog;
 
 void createLog() {
+	std::cout << "Logging:" << path_join(getProfileRoot(), "log.txt") << "\n";
 	logFile.open(path_join(getProfileRoot(), "log.txt"), std::ofstream::trunc | std::ofstream::out);
 	errorLog.open(path_join(getProfileRoot(), "errors.log.txt"), std::fstream::out | std::fstream::app);
 }

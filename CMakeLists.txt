@@ -13,6 +13,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(STARRULER2_BUILD_ANGELSCRIPT "Build AngelScript library" ON)
 
+option(USE_GLFW "Use GLFW library" ON)
+option(USE_SDL2 "Use SDL2 library" OFF)
+
 # Location of additional cmake modules
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
@@ -22,7 +25,6 @@ set(CMAKE_MODULE_PATH
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(CURL REQUIRED)
-find_package(GLFW REQUIRED 3.0.0)
 find_package(OpenAL REQUIRED)
 find_package(OGG REQUIRED)
 find_package(Vorbis REQUIRED)
@@ -32,6 +34,22 @@ find_package(PNG REQUIRED)
 if (UNIX)
     add_definitions(-DLIN_MODE=1 -DNSTEAM=1)
 endif (UNIX)
+
+if (USE_GLFW)
+    find_package(GLFW REQUIRED 3.0.0)
+
+    set(USE_SDL2 OFF)
+    add_definitions(-DUSE_GLFW)
+    remove_definitions(-DUSE_SDL2)
+endif (USE_GLFW)
+
+if (USE_SDL2)
+    find_package(SDL2 REQUIRED)
+
+    set(USE_GLFW OFF)
+    add_definitions(-DUSE_SDL2)
+    remove_definitions(-DUSE_GLFW)
+endif (USE_SDL2)
 
 include(BuildTypeConfig)
 

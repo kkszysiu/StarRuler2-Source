@@ -11,7 +11,11 @@
 #include "main/references.h"
 #include "main/console.h"
 #include "main/game_platform.h"
+#ifdef USE_GLFW
 #include "os/glfw_driver.h"
+#elif USE_SDL2
+#include "os/sdl2_driver.h"
+#endif
 #include "scripts/manager.h"
 #include "scripts/binds.h"
 #include "scripts/context_cache.h"
@@ -264,7 +268,11 @@ bool initGlobal(bool loadGraphics, bool createWindow) {
 	asPrepareMultithread();
 
 	print("Initializing window system");
+#ifdef USE_GLFW
 	devices.driver = os::getGLFWDriver();
+#elif USE_SDL2
+	devices.driver = os::getSDL2Driver();
+#endif
 	devices.driver->resetTimer();
 
 	//Load engine settings
