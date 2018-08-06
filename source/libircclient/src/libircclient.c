@@ -26,6 +26,9 @@
 #include "dcc.h"
 #include "ssl.h"
 
+#ifndef h_addr
+#define h_addr h_addr_list[0]
+#endif
 
 #ifdef _MSC_VER
 	/*

@@ -24,7 +24,7 @@ set(STARRULER2_OS_SRC
 	source/virtual_asm_${ARCHNAME}.cpp
 )
 
-add_definitions(-std=c++11 -Wall -Wno-invalid-offsetof -Wno-switch -Wno-reorder)
+add_definitions(-std=c++11 -Wall -Wno-invalid-offsetof -Wno-switch -Wno-reorder -fPIC)
 
 add_library(starruler2_os STATIC ${STARRULER2_OS_SRC})
 target_link_libraries(starruler2_os starruler2_util Threads::Threads)
