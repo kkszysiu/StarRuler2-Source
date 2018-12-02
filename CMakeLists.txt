@@ -1,4 +1,18 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.6)
+
+if(ANDROID)
+string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
+set(DISTRIBUTION_DIR ${CMAKE_SOURCE_DIR}/android/distribution/android/SDL2/intermediates/ndkBuild)
+set(SDL_LOCATION ${CMAKE_SOURCE_DIR}/external/SDL2)
+
+add_library( SDL2 SHARED IMPORTED )
+set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION
+${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
+
+include_directories(${SDL_LOCATION}/SDL2/include)
+
+endif(ANDROID)
+
 project(starruler2 VERSION 1.0.0 LANGUAGES C CXX)
 
 # This project can use C11, but will gracefully decay down to C89.
@@ -22,12 +36,16 @@ set(CMAKE_MODULE_PATH
     "${CMAKE_MODULE_PATH}"
     )
 
+if(NOT ANDROID)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+elif(NOT ANDROID)
+find_package(GLES2 REQUIRED)
+endif(NOT ANDROID)
 find_package(CURL REQUIRED)
-find_package(OpenAL REQUIRED)
-find_package(OGG REQUIRED)
-find_package(Vorbis REQUIRED)
+# find_package(OpenAL REQUIRED)
+# find_package(OGG REQUIRED)
+# find_package(Vorbis REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(PNG REQUIRED)
 

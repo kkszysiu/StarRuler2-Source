@@ -158,7 +158,11 @@ if(STARRULER2_BUILD_ANGELSCRIPT)
     include_directories(starruler2 angelscript/include)
 endif(STARRULER2_BUILD_ANGELSCRIPT)
 
+if(NOT ANDROID)
 add_executable(starruler2 ${STARRULER2_SRC} ${STARRULER2_GLFW_SRC} ${STARRULER2_SDL2_SRC})
+else(NOT ANDROID)
+add_library( starruler2 SHARED ${SDL_LOCATION}/SDL2/src/main/android/SDL_android_main.c  ${STARRULER2_SRC} ${STARRULER2_SDL2_SRC})
+endif(NOT ANDROID)
 
 target_link_libraries(starruler2
     ${FREETYPE_LIBRARIES}
