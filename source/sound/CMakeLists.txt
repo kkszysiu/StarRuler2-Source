@@ -19,8 +19,10 @@ add_definitions(-std=c++11 -Wall -Wno-invalid-offsetof -Wno-switch -Wno-reorder)
 
 message("OPENAL_LIBRARY: ${OPENAL_LIBRARY}")
 message("OPENAL_INCLUDE_DIR: ${OPENAL_INCLUDE_DIR}")
+message("OGG_LIBRARIES: ${OGG_LIBRARIES}")
 message("OGG_INCLUDE_DIRS: ${OGG_INCLUDE_DIRS}")
 message("VORBIS_LIBRARIES: ${VORBIS_LIBRARIES}")
+message("VORBIS_INCLUDE_DIRS: ${VORBIS_INCLUDE_DIRS}")
 
 add_library(starruler2_sound SHARED ${STARRULER2_SOUND_SRC})
 target_link_libraries(starruler2_sound
