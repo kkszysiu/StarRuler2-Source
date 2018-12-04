@@ -28,8 +28,8 @@ message("VORBIS_INCLUDE_DIRS: ${VORBIS_INCLUDE_DIRS}")
 add_library(starruler2_sound SHARED ${STARRULER2_SOUND_SRC})
 target_link_libraries(starruler2_sound
 	${OPENAL_LIBRARY}
-	${OGG_LIBRARIES}
 	${VORBIS_LIBRARIES}
+	${OGG_LIBRARIES}
 	starruler2_os
 )
 target_include_directories(starruler2_sound PUBLIC
