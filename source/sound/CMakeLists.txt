@@ -31,8 +31,8 @@ target_link_libraries(starruler2_sound
 	${OPENAL_LIBRARY}
 	${OGG_LIBRARIES}
 	${VORBIS_LIBRARIES}
-	${VORBISENC_LIBRARIES}
 	${VORBISFILE_LIBRARIES}
+	${VORBISENC_LIBRARIES}
 	starruler2_os
 )
 target_include_directories(starruler2_sound PUBLIC
