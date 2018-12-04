@@ -21,6 +21,7 @@ else(NOT ANDROID)
   find_library(VORBISFILE_LIBRARY NAMES vorbisfile)
   find_library(VORBISENC_LIBRARY NAMES vorbisenc)
 
+  find_path(VORBIS_INCLUDE_DIRS vorbis/vorbisenc.h)
   set(VORBIS_LIBRARIES ${VORBISENC_LIBRARY} ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY} ${OGG_LIBRARY})
 endif(NOT ANDROID)
 
