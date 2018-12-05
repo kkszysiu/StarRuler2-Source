@@ -1,5 +1,5 @@
 #pragma once
-#ifdef __ANDROID__
+#ifdef ANDROID
 #include <GL/glew.h>
 #endif
 #ifdef USE_GLFW
