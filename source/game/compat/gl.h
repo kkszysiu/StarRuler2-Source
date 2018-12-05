@@ -2,7 +2,7 @@
 #ifndef ANDROID
 #include <GL/glew.h>
 #else
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #endif
 #ifdef USE_GLFW
 #include "GLFW/glfw3.h"
